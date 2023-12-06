@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue.js Example</title>
+</head>
+<body>
+
+  <div id="app">      
+    <!-- 父组件 -->
+    <parent-component  v-if="isShow"></parent-component>
+    <button @click="destory">销毁</button>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js?1701740978904"></script>
+
+
+  <script>
+    // 子组件
+    const child = Vue.component('child-component', {
+      template: '<div>{{name}}</div>',
+      props:['name'],
+      beforeCreate() {
+        console.log("child beforeCreate")
+      },
+      created() {
+        console.log('child created');
+      },
+      beforeMount() {
+        console.log('child beforeMount');
+      },
+      mounted() {
+        console.log('child mounted');
+      },
+      beforeUpdate() {
+        console.log('子组件beforeUpdate');
+      },
+      updated() {
+        console.log('子组件updated');
+      },
+      beforeDestroy() {
+        console.log("子组件 beforeDestroy");
+      },
+      destroyed() {
+        console.log("子组件 destroyed");
+      },
+    });
+
+    // 父组件
+    Vue.component('parent-component', {
+      template: '<div><h2>{{ name }}</h2><button @click="changeName">更新</button><child-component :name="name"></child-component></div>',
+      data() {
+        return {
+          name:"aaa"
+        }     
+      },
+      methods: {
+        changeName() {
+          this.name = 'Doe'+ Math.floor(Math.random(0,1)*10); // 点击按钮时改变 name 的值
+        },
+
+      },
+      beforeCreate() {
+        console.log("parent beforeCreate")
+      },
+      created() {
+        console.log('parent created');
+
+      },
+      beforeMount() {
+        console.log('parent beforeMount');
+      },
+      mounted() {
+        console.log('parent mounted');
+      },
+      beforeUpdate() {
+        console.log('父组件beforeUpdate');
+      },
+      updated() {
+        console.log('父组件updated');
+      },
+      beforeDestroy() {
+        console.log("父组件 beforeDestroy");
+      },
+      destroyed() {
+        console.log("父组件 destroyed");
+      },
+    });
+
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          isShow:true
+        }
+      },
+      methods:{
+        destory(){
+          this.isShow = !this.isShow;
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
