@@ -5,56 +5,35 @@
   <p>{{ message }}</p>
 </template>
 
-<script lang="ts">
-import { FFmpeg } from '@ffmpeg/ffmpeg';
+<script lang="ts" setup>
 import type { LogEvent } from '@ffmpeg/ffmpeg/dist/esm/types';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
-import { defineComponent, ref } from 'vue';
+import { ref, inject } from 'vue';
+import type FFManager from '@/utils/ffmpegManager';
+const ffmpeg = inject('ffmpeg') as FFManager;
+const videoURL = '/video_2.mp4';
+const message = ref('Click Start to Transcode');
+let video = ref('');
 
-const baseURL = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm';
-const videoURL =
-  'https://raw.githubusercontent.com/ffmpegwasm/testdata/master/video-15s.avi';
-
-export default defineComponent({
-  name: 'App',
-  setup() {
-    const ffmpeg = new FFmpeg();
-    const message = ref('Click Start to Transcode');
-    let video = ref('');
-
-    async function transcode() {
-      message.value = 'Loading ffmpeg-core.js';
-      ffmpeg.on('log', ({ message: msg }: LogEvent) => {
-        message.value = msg;
-      });
-      await ffmpeg.load({
-        coreURL: await toBlobURL(
-          `${baseURL}/ffmpeg-core.js`,
-          'text/javascript',
-        ),
-        wasmURL: await toBlobURL(
-          `${baseURL}/ffmpeg-core.wasm`,
-          'application/wasm',
-        ),
-        workerURL: await toBlobURL(
-          `${baseURL}/ffmpeg-core.worker.js`,
-          'text/javascript',
-        ),
-      });
-      message.value = 'Start transcoding';
-      await ffmpeg.writeFile('test.avi', await fetchFile(videoURL));
-      await ffmpeg.exec(['-i', 'test.avi', 'test.mp4']);
-      message.value = 'Complete transcoding';
-      const data = await ffmpeg.readFile('test.mp4');
-      video.value = URL.createObjectURL(
-        new Blob([(data as Uint8Array).buffer], { type: 'video/mp4' }),
-      );
-    }
-    return {
-      video,
-      message,
-      transcode,
-    };
-  },
-});
+async function transcode() {
+  message.value = 'Loading ffmpeg-core.js';
+  ffmpeg.setLogger(({ message: msg }: LogEvent) => {
+    message.value = msg;
+  });
+  message.value = 'Start transcoding';
+  await ffmpeg.writeFile(
+    ffmpeg.pathConfig.resourcePath,
+    'video_2.mp4',
+    videoURL,
+  );
+  await ffmpeg.genFrame('video_2', 'mp4', {
+    w: 1242,
+    h: 30,
+  });
+  // await ffmpeg.run(['-i', 'test.avi', 'test.mp4']);
+  // message.value = 'Complete transcoding';
+  // const data = await ffmpeg.getFileBuffer('', 'test', 'mp4');
+  // video.value = URL.createObjectURL(
+  //   new Blob([(data as Uint8Array).buffer], { type: 'video/mp4' }),
+  // );
+}
 </script>

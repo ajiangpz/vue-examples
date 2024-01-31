@@ -11,8 +11,8 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref } from "vue";
-import { useRouter } from "vue-router";
+import { PropType, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 interface MenuItem {
@@ -25,7 +25,7 @@ const props = defineProps({
     default: () => {},
   },
 });
-const activeRoute = ref("/");
+const activeRoute = ref('/');
 
 const handleMenuSelect = (index: string) => {
   activeRoute.value = index;
