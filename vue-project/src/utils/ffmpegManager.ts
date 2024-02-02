@@ -32,6 +32,7 @@ class FFManager {
   }
   async init() {
     await this.loadFF();
+    this.initFileSystem();
   }
   // 启动执行命令队列
   private startRun() {
@@ -51,6 +52,8 @@ class FFManager {
     const { commands, resolve, reject } = runTask;
 
     const result = await this.ffmpeg.exec([...commands]);
+    console.log(result);
+
     resolve(result);
     this.runTask.shift();
     if (this.runTask.length > 0) {
@@ -64,7 +67,7 @@ class FFManager {
     const list = await this.readDir(filePath);
     console.log(list);
 
-    return list?.indexOf(fileName);
+    return list.map((item: any) => item.name).indexOf(fileName);
   }
   // 读取目录
   async readDir(filePath: string) {
@@ -84,9 +87,9 @@ class FFManager {
     // this.logDir(filePath);
   }
   // 获取文件buffer
-  getFileBuffer(filePath: string, fileName: string, format: string) {
+  async getFileBuffer(filePath: string, fileName: string, format: string) {
     const localPath = `${fileName}.${format}`;
-    return this.ffmpeg.readFile(`${filePath}${localPath}`);
+    return await this.ffmpeg.readFile(`${filePath}${localPath}`);
   }
   // 打印目录
   logDir(filePath: string) {
@@ -99,7 +102,7 @@ class FFManager {
   // 创建目录
   mkdir(paths: string[]) {
     paths.forEach((filePath) => {
-      this.ffmpeg.FS('mkdir', filePath);
+      this.ffmpeg.createDir(filePath);
     });
   }
   // 加载ffmpeg
@@ -137,35 +140,45 @@ class FFManager {
       size,
       format,
     );
+
     await this.run(commands);
     return {
       framePath,
     };
   }
   // 获取视频帧图片
-  getFrame(videoName: string, frameIndex: number) {
+  async getFrame(videoName: string, frameIndex: number) {
     const framePath = `${this.pathConfig.framePath}${videoName}`;
     const fileName = `/pic-${frameIndex}`;
-    return this.getFileBlob(framePath, fileName, 'jpg');
+    return await this.getFileBlob(framePath, fileName, 'jpg');
   }
   // 获取文件Blob
-  getFileBlob(filePath: string, fileName: string, format: string) {
-    const fileBuffer = this.getFileBuffer(filePath, fileName, format);
+  async getFileBlob(filePath: string, fileName: string, format: string) {
+    const fileBuffer = await this.getFileBuffer(filePath, fileName, format);
     return new Blob([fileBuffer], {
       type: FileTypeMap[format as keyof typeof FileTypeMap],
     });
   }
-  
+
   async splitAudio(videoName: string, format: string, force = false) {
     const { commands, audioPath, audioName } = this.baseCommand.splitAudio(
       this.pathConfig.resourcePath,
       videoName,
       format,
     );
-    if (force || !this.fileExist(this.pathConfig.resourcePath, audioName)) {
+    if (force) {
       await this.run(commands);
+    } else {
+      const isFileExist = await this.fileExist(
+        this.pathConfig.resourcePath,
+        audioName,
+      );
+      if (isFileExist == -1) {
+        await this.run(commands);
+      }
+
+      return { audioPath, audioName };
     }
-    return { audioPath, audioName };
   }
   run(commands: string[]) {
     const result = this.existCommand(commands);
@@ -194,6 +207,5 @@ class FFManager {
   setLogger(cb: Function) {
     this.ffmpeg.on('log', cb);
   }
-  
 }
 export default FFManager;
