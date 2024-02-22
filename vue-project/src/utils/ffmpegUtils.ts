@@ -40,7 +40,23 @@ export const initVideo = async (video: Blob) => {
   ffmpeg.FS('writeFile', videoName, await fetchFile(video));
   await ffmpeg.run('-i', videoName);
 };
-
+// 导入音频
+let audioName = 'initAudio';
+export const initAudio = async (audio: Blob) => {
+  ffmpeg.FS('writeFile', audioName, await fetchFile(audio));
+  await ffmpeg.run('-i', audioName);
+};
+// 合成音视频
+export const mergeVideoAudio = async () => {
+  // await initVideo(videoUrl);
+  // await initAudio(audioUrl);
+  const cmd = `-i ${videoName} -i ${audioName} -filter_complex [1:a]volume=0.3[a1];[0:a][a1]amix=inputs=2:duration=first[a] -map 0:v -map -c:v copy -c:a aac -y output.mp4`;
+  await ffmpeg.run(...cmd.split(' '));
+  const outputData = ffmpeg.FS('readFile', 'output.mp4');
+  const outputBlob = new Blob([outputData.buffer], { type: 'video/mp4' });
+  return URL.createObjectURL(outputBlob);
+};
+// 下载视频
 let fontName = 'font1';
 /** ffmpeg导入字体 */
 export const writeFontFile = async (font: Blob) => {
