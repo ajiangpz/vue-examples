@@ -1,6 +1,6 @@
 <template>
   <ElContainer class="layout">
-    <ElHeader class="header"></ElHeader>
+    <ElHeader class="header">header</ElHeader>
     <ElContainer>
       <el-aside width="200px">
         <Resource></Resource>
