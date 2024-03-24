@@ -2,6 +2,7 @@
   width: 100vw;
   height: 100vh;
   box-sizing: border-box;
+  background-color: #fff;
 }
 
 /* 在你的全局样式表中 */

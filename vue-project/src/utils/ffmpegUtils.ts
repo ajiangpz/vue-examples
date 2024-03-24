@@ -50,7 +50,7 @@ export const initAudio = async (audio: Blob) => {
 export const mergeVideoAudio = async () => {
   // await initVideo(videoUrl);
   // await initAudio(audioUrl);
-  const cmd = `-i ${videoName} -i ${audioName} -filter_complex [1:a]volume=0.3[a1];[0:a][a1]amix=inputs=2:duration=first[a] -map 0:v -map -c:v copy -c:a aac -y output.mp4`;
+  const cmd = `-i ${videoName} -i ${audioName} -c:v copy -c:a aac -strict experimental -map 0:v:0 -map 1:a:0 output.mp4`
   await ffmpeg.run(...cmd.split(' '));
   const outputData = ffmpeg.FS('readFile', 'output.mp4');
   const outputBlob = new Blob([outputData.buffer], { type: 'video/mp4' });
