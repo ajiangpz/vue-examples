@@ -1,29 +1,64 @@
 <template>
   <div class="resource-list">
-    <el-tabs v-model="activeName" type="card" class="demo-tabs" @tab-click="handleClick">
-      <el-tab-pane v-for="(item, index) in result" :label="item.title" :name="index">{{ item.title }}</el-tab-pane>
-    </el-tabs>
+    <el-select v-model="activeNames" @change="handleChange" style="width: 208px;margin-bottom: 16px;">
+      <el-option v-for="(item, idx) in result" :label="item.title" :value="idx"></el-option>
+    </el-select>
+    <div class="item-content">
+      <ResourceItem :type="resourceType" :data="resourceItem"
+        v-for="(resourceItem, index) in result && result[activeNames].items" :key="index"></ResourceItem>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { getdata } from "@/api/mock";
 import { useRequest } from 'vue-hooks-plus';
-import { ref } from "vue";
+import { ref, watchEffect } from "vue";
+import ResourceItem from "./ResourceItem.vue";
+const activeNames = ref(0);
 const props = defineProps({
   resourceType: {
-    type: [String, Number],
+    type: [String],
     default: "video"
   }
 });
-const activeName = ref(0)
-const { data: result } = useRequest(() => getdata(props.resourceType));
-console.log(result)
 
-const handleClick = (data: number) => {
-  console.log(data);
+const { data: result, refresh } = useRequest(() => getdata(props.resourceType));
+const handleChange = (val: string[]) => {
+  console.log(val);
 }
+watchEffect(() => {
+  activeNames.value = 0;
+  refresh();
+})
 
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+.resource-list {
+  max-width: 220px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.item-title {
+  margin-bottom: 8px;
+}
+
+.item-content {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+
+  .cover {
+    margin-right: 8px;
+    border-radius: 4px;
+  }
+
+  .resource-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center
+  }
+}
+</style>

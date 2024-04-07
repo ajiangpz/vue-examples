@@ -1,13 +1,15 @@
 <template>
   <ElContainer class="layout">
     <ElHeader class="header">header</ElHeader>
-    <ElContainer>
-      <el-aside width="200px">
+    <ElContainer class="container">
+      <el-aside width="300px">
         <Resource></Resource>
       </el-aside>
       <!-- 展示资源组件 -->
 
-      <ElMain><RouterView></RouterView></ElMain>
+      <ElMain>
+        <RouterView></RouterView>
+      </ElMain>
     </ElContainer>
   </ElContainer>
 </template>
@@ -18,9 +20,16 @@ import Resource from '@/components/Resource.vue';
 <style lang="scss">
 .layout {
   .el-header {
-    height: 60px;
-    background: rgba(23, 24, 26, 1);
-    color: white;
+    height: 50px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+    /* 阴影 */
+  }
+
+  .el-container {
+    margin-top: 6px;
   }
 }
 </style>
